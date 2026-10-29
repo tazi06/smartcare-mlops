@@ -9,7 +9,7 @@ on:
 
 jobs:
   train:
-    runs-on: [self-hosted, vpc]
+    runs-on: self-hosted
     outputs:
       version: ${{ steps.train.outputs.version }}
     env:
@@ -32,3 +32,24 @@ jobs:
         run: |
           . .venv/bin/activate
           python training/train.py
+  eval:
+    needs: train
+    runs-on: self-hosted
+    env:
+      MINIO_ENDPOINT: "10.10.0.13:9000"
+      MLFLOW_TRACKING_URI: "http://10.10.0.14:5000"
+      MINIO_USER: ${{ secrets.MINIO_USER }}
+      MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install -q -r training/requirements.txt
+
+      - name: Evaluate
+        run: |
+          . .venv/bin/activate
+          python training/evaluate.py
