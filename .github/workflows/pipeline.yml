@@ -121,3 +121,18 @@ jobs:
       - name: Roll back if it failed
         if: failure()
         run: kubectl rollout undo deployment/risk-service || true
+  smoke:
+    needs: [train, deploy]
+    runs-on: self-hosted]
+    env:
+      EXPECTED_VERSION: ${{ needs.train.outputs.version }}
+      URL: "http://10.10.0.15:30000"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Smoke test
+        run: python3 deploy/smoke_test.py
+
+      - name: Roll back if the test failed
+        if: failure()
+        run: kubectl rollout undo deployment/risk-service
