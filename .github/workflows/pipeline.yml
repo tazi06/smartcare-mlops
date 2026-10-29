@@ -86,3 +86,21 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker rm -f risk-test || true
+    push:
+    needs: [train, build]
+    runs-on: self-hosted
+    env:
+      MODEL_VERSION: ${{ needs.train.outputs.version }}
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/risk-service
+    steps:
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Tag and push
+        run: |
+          docker tag risk-service:v${MODEL_VERSION} ${IMAGE}:v${MODEL_VERSION}
+          docker push ${IMAGE}:v${MODEL_VERSION}
+
+      - name: Logout
+        if: always()
+        run: docker logout
