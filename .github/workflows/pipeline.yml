@@ -86,7 +86,7 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker rm -f risk-test || true
-    push:
+  push:
     needs: [train, build]
     runs-on: self-hosted
     env:
@@ -103,4 +103,4 @@ jobs:
 
       - name: Logout
         if: always()
-        run: docker logout
+        run: docker logout   
