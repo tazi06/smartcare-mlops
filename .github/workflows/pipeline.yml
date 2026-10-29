@@ -1,0 +1,34 @@
+name: pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      min_f1:
+        description: "Minimum F1 to pass the gate"
+        default: "0.5"
+
+jobs:
+  train:
+    runs-on: [self-hosted, vpc]
+    outputs:
+      version: ${{ steps.train.outputs.version }}
+    env:
+      MINIO_ENDPOINT: "10.10.0.13:9000"
+      MLFLOW_TRACKING_URI: "http://10.10.0.14:5000"
+      MINIO_USER: ${{ secrets.MINIO_USER }}
+      MINIO_PASSWORD: ${{ secrets.MINIO_PASSWORD }}
+      MIN_F1: ${{ inputs.min_f1 }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install -q -r training/requirements.txt
+
+      - name: Train
+        id: train
+        run: |
+          . .venv/bin/activate
+          python training/train.py
