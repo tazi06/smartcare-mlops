@@ -53,3 +53,36 @@ jobs:
         run: |
           . .venv/bin/activate
           python training/evaluate.py
+  build:
+    needs: [train, eval]
+    runs-on: self-hosted
+    env:
+      MLFLOW_TRACKING_URI: "http://10.10.0.14:5000"
+      MODEL_VERSION: ${{ needs.train.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the model from MLflow
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install -q mlflow xgboost scikit-learn
+          python serving/fetch_model.py
+
+      - name: Build the image
+        run: docker build -t risk-service:v${MODEL_VERSION} serving/
+
+      - name: Test the image
+        run: |
+          docker rm -f risk-test || true
+          docker run -d --name risk-test -p 3001:3000 risk-service:v${MODEL_VERSION}
+          for i in $(seq 1 60); do curl -sf http://localhost:3001/readyz && break || sleep 2; done
+          curl -sf -X POST http://localhost:3001/predict \
+            -H "Content-Type: application/json" \
+            -d '{"items": [
+              {"patient_id":"p-1","window_end":"2026-10-03T14:05:00Z","hr_mean_5min":74,"hr_std_5min":3,"spo2_min_5min":97,"temp_mean_5min":36.7,"steps_5min":60},
+              {"patient_id":"p-2","window_end":"2026-10-03T14:05:00Z","hr_mean_5min":121,"hr_std_5min":9,"spo2_min_5min":88,"temp_mean_5min":37.7,"steps_5min":55}]}'
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f risk-test || true

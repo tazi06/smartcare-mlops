@@ -1,0 +1,4 @@
+bentoml
+xgboost
+scikit-learn
+numpy
