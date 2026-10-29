@@ -123,7 +123,7 @@ jobs:
         run: kubectl rollout undo deployment/risk-service || true
   smoke:
     needs: [train, deploy]
-    runs-on: self-hosted]
+    runs-on: self-hosted
     env:
       EXPECTED_VERSION: ${{ needs.train.outputs.version }}
       URL: "http://10.10.0.15:30000"
