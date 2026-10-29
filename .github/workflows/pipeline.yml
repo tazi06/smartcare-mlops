@@ -136,3 +136,18 @@ jobs:
       - name: Roll back if the test failed
         if: failure()
         run: kubectl rollout undo deployment/risk-service
+  promote:
+    needs: [train, smoke]
+    runs-on: self-hosted
+    env:
+      MLFLOW_TRACKING_URI: "http://10.10.0.14:5000"
+      MODEL_VERSION: ${{ needs.train.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Promote in MLflow
+        run: |
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install -q mlflow
+          python deploy/promote.py
