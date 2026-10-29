@@ -104,3 +104,20 @@ jobs:
       - name: Logout
         if: always()
         run: docker logout   
+  deploy:
+    needs: [train, push]
+    runs-on: self-hosted
+    env:
+      MODEL_VERSION: ${{ needs.train.outputs.version }}
+      IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/risk-service
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to k3s
+        run: |
+          sed "s#IMAGE_PLACEHOLDER#${IMAGE}:v${MODEL_VERSION}#" deploy/k8s.yaml | kubectl apply -f -
+          kubectl rollout status deployment/risk-service --timeout=180s
+
+      - name: Roll back if it failed
+        if: failure()
+        run: kubectl rollout undo deployment/risk-service || true
