@@ -1,0 +1,10 @@
+services:
+  dashboard:
+    build: .
+    container_name: dashboard
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8501:8501"
+    environment:
+      PG_HOST: "10.10.0.14"
+      PG_PASSWORD: ${PG_RO_PASSWORD}

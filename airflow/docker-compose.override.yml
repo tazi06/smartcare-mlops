@@ -1,0 +1,18 @@
+x-common: &common
+  build: .
+  image: smartcare-airflow:3.2.0
+  environment:
+    MINIO_ENDPOINT: "10.10.0.13:9000"
+    MINIO_USER: ${MINIO_USER}
+    MINIO_PASSWORD: ${MINIO_PASSWORD}
+    AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+    AIRFLOW__CORE__DAGBAG_IMPORT_TIMEOUT: "120"
+    AIRFLOW__CORE__DAG_FILE_PROCESSOR_TIMEOUT: "180"
+
+services:
+  airflow-init: *common
+  airflow-apiserver: *common
+  airflow-scheduler: *common
+  airflow-dag-processor: *common
+  airflow-worker: *common
+  airflow-triggerer: *common
