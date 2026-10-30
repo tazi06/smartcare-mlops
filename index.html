@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>SmartCare MLOps Architecture</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+<style>
+  :root {
+    color-scheme:light;
+    --ink:#0f172a; --muted:#475569; --line:#e5e7eb;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html { scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:smooth; }
+  * { box-sizing:border-box; }
+  body {
+    margin:0; background:#fff; color:var(--ink);
+    font:17px/1.7 Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  }
+  .page { max-width:860px; margin:0 auto; padding:64px 24px 88px; }
+  h1 { font-size:clamp(30px,5vw,44px); line-height:1.12; margin:0 0 14px; letter-spacing:-0.03em; }
+  .lead { color:var(--muted); font-size:18px; max-width:56ch; margin:0 0 28px; }
+  nav { display:none; }
+  .note {
+    border:1px solid var(--line); border-radius:12px; padding:14px 18px;
+    font-size:15px; color:var(--muted); margin:0; background:#f9fafb;
+  }
+  section { margin:64px 0 0; }
+  h2 { display:flex; align-items:center; gap:12px; font-size:24px; margin:0 0 20px; letter-spacing:-0.02em; }
+  h2 span {
+    flex:none; width:32px; height:32px; border-radius:50%; background:var(--c); color:#fff;
+    display:grid; place-items:center; font-size:15px; font-weight:700;
+  }
+  pre.mermaid {
+    background:#fff; border:1px solid var(--line); border-radius:16px;
+    padding:28px 14px; margin:0; text-align:center; overflow-x:auto; color:#172554;
+    box-shadow:0 1px 2px rgba(15,23,42,.04), 0 8px 24px rgba(15,23,42,.05);
+  }
+  pre.mermaid { font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.25; white-space:normal; }
+  pre.mermaid svg { max-width:100%; height:auto; overflow:visible; }
+  pre.mermaid foreignObject { overflow:visible; }
+  pre.mermaid .nodeLabel, pre.mermaid .edgeLabel { line-height:1.25; white-space:nowrap; }
+  pre.mermaid p { margin:0 !important; padding:0 !important; border:0 !important; max-width:none !important; color:inherit; }
+  section > p {
+    margin:20px 0 0; padding-left:16px; border-left:3px solid var(--c);
+    color:var(--muted); max-width:64ch;
+  }
+  .data { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0 0; }
+  .data > div { border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:#f9fafb; min-width:0; }
+  .data b { display:block; font-size:14px; margin-bottom:8px; color:var(--c); }
+  .data pre { margin:0; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; color:#1e293b; overflow-x:auto; white-space:pre; }
+  .data small { display:block; margin-top:8px; color:#64748b; font-size:13px; line-height:1.5; }
+  @media (max-width:720px) { .data { grid-template-columns:1fr; } }
+  .s1 { --c:#3b82f6; } .s2 { --c:#10b981; } .s3 { --c:#f97316; } .s4 { --c:#a855f7; } .s5 { --c:#ec4899; }
+  footer { margin-top:72px; padding-top:20px; border-top:1px solid var(--line); color:#94a3b8; font-size:14px; }
+  @media print {
+    .page { max-width:none; padding:0; } section { break-inside:avoid; }
+    body { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+<h1>SmartCare MLOps architecture</h1>
+<p class="lead">How patient vitals move from wearable devices to a live risk dashboard, and how models are trained and deployed.</p>
+<p class="note">Monitoring and observability are not implemented. DevSecOps scanning is a possible future enhancement.</p>
+
+<section class="s1" id="s1">
+<h2><span>1</span>Data ingestion</h2>
+<pre class="mermaid">
+flowchart LR
+    A["Wearable devices&lt;br/&gt;2,000 simulated patients"] --> B["Python simulator"]
+    B --> C["Patient vitals&lt;br/&gt;Heart rate, SpO₂, temperature&lt;br/&gt;Steps, battery, timestamp"]
+    C --> D["Apache Kafka&lt;br/&gt;wearables.vitals"]
+
+    classDef source fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
+    classDef process fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
+    classDef data fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef broker fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
+    class A source
+    class B process
+    class C data
+    class D broker
+</pre>
+<div class="data"><div><b>Before</b><pre>patient p-000001
+  baseline  hr 72, spo2 97, temp 36.7
+  battery   88 %
+  crisis    no</pre><small>A simulator state in memory.</small></div><div><b>After</b><pre>{"device_id": "wb-000001",
+ "patient_id": "p-000001",
+ "ts": "2026-10-03T14:01:00",
+ "heart_rate": 74, "spo2": 97,
+ "temperature": 36.7,
+ "steps": 12, "battery": 88}</pre><small>One JSON event in Kafka, keyed by patient. About 2% of events are made dirty on purpose: a missing value, heart rate 0 or 250, a late timestamp, or a duplicate.</small></div></div>
+<p>The simulator sends one event per device every 60 seconds, about 33 events per second in total.</p>
+</section>
+
+<section class="s2" id="s2">
+<h2><span>2</span>Real-time processing</h2>
+<pre class="mermaid">
+flowchart TD
+    A["Kafka topic&lt;br/&gt;wearables.vitals"]
+    A --> B["Kafka Connect&lt;br/&gt;S3 sink"]
+    B --> C["MinIO&lt;br/&gt;Raw event storage"]
+    A --> D["Apache Flink"]
+    D --> E["5-minute event-time windows&lt;br/&gt;Group by patient"]
+    E --> F["Feature aggregation"]
+    F --> G["BentoML REST API&lt;br/&gt;Serving XGBoost"]
+    G --> H["Patient risk prediction"]
+    H --> I["PostgreSQL&lt;br/&gt;Predictions and alerts"]
+    I --> J["Streamlit dashboard"]
+
+    classDef kafka fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
+    classDef storage fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
+    classDef stream fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
+    classDef ml fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef output fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:2px
+    class A kafka
+    class B,C storage
+    class D,E,F stream
+    class G,H ml
+    class I,J output
+</pre>
+<div class="data"><div><b>Before</b><pre>5 events, 14:00 to 14:05
+heart_rate  74 73 76 72 75
+spo2        97 98 97 97 98
+temperature 36.7 (all five)
+steps       12 9 14 11 15</pre><small>Separate raw events. A copy of each raw event also goes to MinIO as gzip JSON.</small></div><div><b>After</b><pre>patient_id      p-000001
+window          14:00 to 14:05
+hr_mean_5min    74.0
+hr_std_5min     1.58
+spo2_min_5min   97
+temp_mean_5min  36.7
+steps_5min      61
+n_events        5
+risk_score      0.03   (example)</pre><small>One feature row per patient per window, scored by BentoML. The row goes to <code>scores</code>. If risk is 0.8 or more it also goes to <code>alerts</code> (HIGH from 0.95).</small></div></div>
+<p>Kafka Connect saves the raw stream to MinIO. Separately, Flink turns events into five-minute patient features. BentoML serves the XGBoost model, and predictions go to PostgreSQL for the Streamlit dashboard.</p>
+</section>
+
+<section class="s3" id="s3">
+<h2><span>3</span>Batch ETL and feature engineering</h2>
+<pre class="mermaid">
+flowchart TD
+    A["MinIO&lt;br/&gt;Raw historical data"] --> B["Apache Airflow&lt;br/&gt;Orchestrate ETL"]
+    B --> C["DuckDB"]
+    C --> D["Clean and transform data"]
+    D --> E["Remove duplicate records"]
+    E --> F["Aggregate into 5-minute&lt;br/&gt;patient windows"]
+    F --> G["Generate model features"]
+    G --> H["Parquet feature dataset"]
+    H --> I["MinIO&lt;br/&gt;clean-data/features/"]
+
+    classDef storage fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
+    classDef orchestration fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef transform fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px
+    classDef output fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
+    class A,I storage
+    class B orchestration
+    class C,D,E,F,G transform
+    class H output
+</pre>
+<div class="data"><div><b>Before</b><pre>ts 14:01  hr 74   spo2 97    temp 36.7  steps 12
+ts 14:01  hr 74   spo2 97    temp 36.7  steps 12   (duplicate)
+ts 14:02  hr 250  spo2 null  temp 36.7  steps 10</pre><small>Raw JSON with a duplicate, an impossible heart rate and a missing SpO₂.</small></div><div><b>After</b><pre>patient_id      p-000001
+window_start    14:00
+hr_mean_5min    74.0
+hr_std_5min     0
+spo2_min_5min   97
+temp_mean_5min  36.7
+steps_5min      22
+n_events        2
+label           0</pre><small>The duplicate is removed and the out-of-range value is blanked. The rows become one 5-minute window with a crisis label (0 or 1), saved as Parquet.</small></div></div>
+<p>Airflow runs the historical ETL. DuckDB cleans, deduplicates and aggregates the data, then saves the features as Parquet in MinIO.</p>
+</section>
+
+<section class="s4" id="s4">
+<h2><span>4</span>Model training and evaluation</h2>
+<pre class="mermaid">
+flowchart TD
+    A["MinIO&lt;br/&gt;Prepared Parquet features"] --> B["DuckDB&lt;br/&gt;Load and sort data"]
+    B --> C["Train / test split&lt;br/&gt;80% / 20%"]
+    C --> D["XGBoost model training"]
+    D --> E["Model evaluation&lt;br/&gt;F1, precision, recall, AP"]
+    E --> F{"F1 ≥ minimum?"}
+    F -->|Yes| G["MLflow Model Registry"]
+    G --> H["Register candidate model"]
+    F -->|No| I["Fail training workflow"]
+
+    classDef data fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
+    classDef preparation fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px
+    classDef training fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef decision fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:2px
+    classDef success fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
+    classDef failure fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D,stroke-width:2px
+    class A data
+    class B,C preparation
+    class D,E training
+    class F decision
+    class G,H success
+    class I failure
+</pre>
+<div class="data"><div><b>Before</b><pre>clean-data/features/date=*/features.parquet
+patient_id, window_start,
+5 feature columns, n_events, label
+(rows sorted by window_start)</pre><small>Feature rows with labels.</small></div><div><b>After</b><pre>train  oldest 80 % of rows
+test   newest 20 % of rows
+
+metrics: f1, recall, precision, pr_auc
+
+MLflow: smartcare-risk, version N
+alias "candidate" if f1 passes</pre><small>A trained XGBoost model and its metrics. The version number N is passed to the next jobs. If F1 is too low, the job fails and no alias is set.</small></div></div>
+<p>The workflow trains and evaluates XGBoost, tracks metrics in MLflow, and registers a candidate model only if it meets the F1 threshold, which you set when you start the workflow (default 0.5).</p>
+</section>
+
+<section class="s5" id="s5">
+<h2><span>5</span>CI/CD and k3s deployment</h2>
+<pre class="mermaid">
+flowchart TD
+    A["GitHub Actions&lt;br/&gt;Manual trigger&lt;br/&gt;Input: minimum F1, default 0.5"] --> B["train&lt;br/&gt;Train the model&lt;br/&gt;Output: model version"]
+    B --> C["eval&lt;br/&gt;Evaluate the model"]
+    C --> D["build&lt;br/&gt;Fetch model from MLflow&lt;br/&gt;Build Docker image"]
+    D --> E["Test the image&lt;br/&gt;Readiness check and&lt;br/&gt;sample prediction request"]
+    E --> F["push&lt;br/&gt;Push image to Docker Hub"]
+    F --> G["deploy&lt;br/&gt;Apply manifest to k3s&lt;br/&gt;Wait for rollout"]
+    G --> H{"Rollout succeeded?"}
+    H -->|No| R["Roll back deployment"]
+    H -->|Yes| I["smoke&lt;br/&gt;Smoke test checks&lt;br/&gt;the expected model version"]
+    I --> J{"Smoke test passed?"}
+    J -->|No| R
+    J -->|Yes| K["promote&lt;br/&gt;Promote the model in MLflow"]
+
+    classDef pipeline fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
+    classDef build fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
+    classDef deploy fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
+    classDef decision fill:#FEF3C7,stroke:#D97706,color:#78350F,stroke-width:2px
+    classDef success fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
+    classDef failure fill:#FEE2E2,stroke:#DC2626,color:#7F1D1D,stroke-width:2px
+    class A pipeline
+    class B,C,D,E build
+    class F,G,I deploy
+    class H,J decision
+    class K success
+    class R failure
+</pre>
+<div class="data"><div><b>Before</b><pre>MLflow
+smartcare-risk version N
+alias: candidate</pre><small>A model version in the registry.</small></div><div><b>After</b><pre>serving/model/model.json + VERSION
+→ image risk-service:vN
+→ Docker Hub  user/risk-service:vN
+→ k3s, 2 replicas, port 30000
+→ /predict returns model_version N
+→ MLflow alias "production" = N</pre><small>The same version, packed in an image and running in k3s. The production alias moves to it only after the smoke test passes.</small></div></div>
+<p>One manually triggered GitHub Actions workflow runs seven jobs on a self-hosted runner: train, eval, build, push, deploy, smoke and promote. The build job also tests the image before it is pushed. If the rollout or the smoke test fails, the deployment is rolled back and the model is not promoted.</p>
+</section>
+
+<footer>SmartCare MLOps architecture diagrams</footer>
+</main>
+<script>
+  mermaid.initialize({
+    startOnLoad: false,
+    theme: 'base',
+    themeVariables: {
+      background: '#ffffff',
+      primaryTextColor: '#172554',
+      lineColor: '#64748b',
+      fontFamily: 'Arial, Helvetica, sans-serif',
+      fontSize: '16px'
+    },
+    flowchart: { htmlLabels: false, curve: 'basis', padding: 18, nodeSpacing: 45, rankSpacing: 50, useMaxWidth: true }
+  });
+  window.addEventListener('load', function () { mermaid.run({ querySelector: 'pre.mermaid' }); });
+</script>
+
+<!--claude-mermaid-runtime-begin:3477-->
+<style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
+<script src="/_runtime/mermaid-11.16.1.min.js"></script>
+<script>(function(){
+var CFG={"palettes":{"light":{"surface":"#f4efe4","text":"#42392e","line":"#8a7f6d","border":"#7a6c52","bg":"#fffdf8"},"dark":{"surface":"#262b34","text":"#f2f3f5","line":"#a8adb8","border":"#9aa4b8","bg":"#1f232b"}}};
+if(typeof mermaid==='undefined')return;
+var pres=Array.prototype.slice.call(document.querySelectorAll('pre.mermaid')).filter(function(p){if(p.hasAttribute('data-claude-mermaid-claimed'))return false;p.setAttribute('data-claude-mermaid-claimed','1');return true;});
+if(!pres.length)return;
+var mq=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+var root=document.documentElement;
+var items=pres.map(function(pre){
+var mount=document.createElement('div');mount.className='mermaid-diagram';
+return {pre:pre,mount:mount,src:pre.textContent||''};
+});
+var seq=0;
+var renderGen=0;
+var lastKey='';
+function pageBg(fallback){
+var els=[document.body,document.documentElement];
+for(var i=0;i<els.length;i++){
+var c=els[i]&&getComputedStyle(els[i]).backgroundColor;
+if(c&&c!=='transparent'&&c!=='rgba(0, 0, 0, 0)')return c;
+}
+return fallback;
+}
+function render(){
+var theme=root.getAttribute('data-theme');
+var dark=theme==='dark'||(!!(mq&&mq.matches)&&theme!=='light');
+var pal=dark?CFG.palettes.dark:CFG.palettes.light;
+var bg=pageBg(pal.bg);
+var key=(dark?'d':'l')+'|'+bg;
+if(key===lastKey)return;
+lastKey=key;
+var gen=++renderGen;
+var font=getComputedStyle(document.body).fontFamily||'sans-serif';
+var nat={useMaxWidth:false};
+mermaid.initialize({
+startOnLoad:false,securityLevel:'strict',theme:'base',
+flowchart:nat,sequence:nat,er:nat,state:nat,class:nat,pie:nat,
+gantt:nat,journey:nat,timeline:nat,gitGraph:nat,mindmap:nat,xyChart:nat,
+quadrantChart:nat,sankey:nat,c4:nat,requirement:nat,block:nat,
+packet:nat,kanban:nat,architecture:nat,radar:nat,
+themeVariables:{background:bg,mainBkg:pal.surface,primaryColor:pal.surface,
+primaryTextColor:pal.text,lineColor:pal.line,primaryBorderColor:pal.border,
+nodeBorder:pal.border,clusterBorder:pal.border,edgeLabelBackground:bg,
+clusterBkg:'rgba(127,127,127,0.07)',titleColor:pal.text,
+darkMode:dark,rowOdd:bg,rowEven:'rgba(127,127,127,0.07)',
+attributeBackgroundColorOdd:bg,attributeBackgroundColorEven:'rgba(127,127,127,0.07)',
+fontSize:'16px',fontFamily:font},
+themeCSS:'.node rect, .node circle, .node polygon, .node path, .cluster rect { stroke-width: 2px; }'
+});
+items.forEach(function(it){
+var id='claude-mermaid-'+seq++;
+mermaid.render(id,it.src).then(function(r){
+if(gen!==renderGen)return;
+var prev=it.pre.previousElementSibling;
+if(prev&&prev.className==='mermaid-diagram'&&prev!==it.mount)return;
+it.mount.innerHTML=r.svg;
+if(!it.mount.parentNode)it.pre.parentNode.insertBefore(it.mount,it.pre);
+it.pre.style.display='none';
+},function(){
+var scratch=document.getElementById(id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+scratch=document.getElementById('d'+id);
+if(scratch)scratch.parentNode.removeChild(scratch);
+if(gen!==renderGen)return;
+if(it.mount.parentNode)it.mount.parentNode.removeChild(it.mount);
+it.pre.style.display='';
+});
+});
+}
+render();
+if(mq&&mq.addEventListener)mq.addEventListener('change',render);
+if(typeof MutationObserver!=='undefined')new MutationObserver(render).observe(root,{attributes:true,attributeFilter:['data-theme']});
+})();</script>
+<!--claude-mermaid-runtime-end-->
+</body>
+</html>
