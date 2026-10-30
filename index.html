@@ -5,68 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>SmartCare MLOps Architecture</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
-<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
 <style>
-  :root {
-    color-scheme:light;
-    --ink:#0f172a; --muted:#475569; --line:#e5e7eb;
-    box-sizing:border-box;
-    padding-top:env(safe-area-inset-top,0px);
-    padding-bottom:env(safe-area-inset-bottom,0px);
-  }
-  html { scroll-padding-top:env(safe-area-inset-top,0px); scroll-behavior:smooth; }
-  * { box-sizing:border-box; }
-  body {
-    margin:0; background:#fff; color:var(--ink);
-    font:17px/1.7 Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  }
-  .page { max-width:860px; margin:0 auto; padding:64px 24px 88px; }
-  h1 { font-size:clamp(30px,5vw,44px); line-height:1.12; margin:0 0 14px; letter-spacing:-0.03em; }
-  .lead { color:var(--muted); font-size:18px; max-width:56ch; margin:0 0 28px; }
-  nav { display:none; }
-  .note {
-    border:1px solid var(--line); border-radius:12px; padding:14px 18px;
-    font-size:15px; color:var(--muted); margin:0; background:#f9fafb;
-  }
-  section { margin:64px 0 0; }
-  h2 { display:flex; align-items:center; gap:12px; font-size:24px; margin:0 0 20px; letter-spacing:-0.02em; }
-  h2 span {
-    flex:none; width:32px; height:32px; border-radius:50%; background:var(--c); color:#fff;
-    display:grid; place-items:center; font-size:15px; font-weight:700;
-  }
-  pre.mermaid {
-    background:#fff; border:1px solid var(--line); border-radius:16px;
-    padding:28px 14px; margin:0; text-align:center; overflow-x:auto; color:#172554;
-    box-shadow:0 1px 2px rgba(15,23,42,.04), 0 8px 24px rgba(15,23,42,.05);
-  }
-  pre.mermaid { font-family:Arial,Helvetica,sans-serif; font-size:16px; line-height:1.25; white-space:normal; }
-  pre.mermaid svg { max-width:100%; height:auto; overflow:visible; }
-  pre.mermaid foreignObject { overflow:visible; }
-  pre.mermaid .nodeLabel, pre.mermaid .edgeLabel { line-height:1.25; white-space:nowrap; }
-  pre.mermaid p { margin:0 !important; padding:0 !important; border:0 !important; max-width:none !important; color:inherit; }
-  section > p {
-    margin:20px 0 0; padding-left:16px; border-left:3px solid var(--c);
-    color:var(--muted); max-width:64ch;
-  }
-  .data { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:18px 0 0; }
-  .data > div { border:1px solid var(--line); border-radius:12px; padding:14px 16px; background:#f9fafb; min-width:0; }
-  .data b { display:block; font-size:14px; margin-bottom:8px; color:var(--c); }
-  .data pre { margin:0; font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace; color:#1e293b; overflow-x:auto; white-space:pre; }
-  .data small { display:block; margin-top:8px; color:#64748b; font-size:13px; line-height:1.5; }
-  @media (max-width:720px) { .data { grid-template-columns:1fr; } }
-  .s1 { --c:#3b82f6; } .s2 { --c:#10b981; } .s3 { --c:#f97316; } .s4 { --c:#a855f7; } .s5 { --c:#ec4899; }
-  footer { margin-top:72px; padding-top:20px; border-top:1px solid var(--line); color:#94a3b8; font-size:14px; }
-  @media print {
-    .page { max-width:none; padding:0; } section { break-inside:avoid; }
-    body { print-color-adjust:exact; -webkit-print-color-adjust:exact; }
-  }
+:root{color-scheme:light;--ink:#0f172a;--muted:#475569;--line:#e5e7eb;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font:17px/1.7 Inter,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+.page{max-width:860px;margin:0 auto;padding:64px 24px 88px}
+h1{font-size:clamp(30px,5vw,44px);line-height:1.12;margin:0 0 14px;letter-spacing:-.03em}
+.lead{color:var(--muted);font-size:18px;max-width:56ch;margin:0 0 28px}
+.note{border:1px solid var(--line);border-radius:12px;padding:14px 18px;font-size:15px;color:var(--muted);margin:0;background:#f9fafb}
+section{margin:64px 0 0}
+h2{display:flex;align-items:center;gap:12px;font-size:24px;margin:0 0 20px;letter-spacing:-.02em}
+h2 span{flex:none;width:32px;height:32px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:15px;font-weight:700}
+pre.mermaid,.mermaid-diagram{background:#fff;border:1px solid var(--line);border-radius:16px;padding:28px 14px;margin:0;text-align:center;overflow-x:auto;color:#172554;box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.05);font-family:Arial,Helvetica,sans-serif;font-size:16px}
+section>p{margin:20px 0 0;padding-left:16px;border-left:3px solid var(--c);color:var(--muted);max-width:64ch}
+.data{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 0}
+.data>div{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#f9fafb;min-width:0}
+.data b{display:block;font-size:14px;margin-bottom:8px;color:var(--c)}
+.data pre{margin:0;font:13px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;color:#1e293b;overflow-x:auto;white-space:pre}
+.data small{display:block;margin-top:8px;color:#64748b;font-size:13px;line-height:1.5}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);border-top:3px solid var(--c);border-radius:12px;padding:14px 16px;background:#f9fafb;min-width:0}
+.card b{display:block;font-size:16px;margin-bottom:6px}
+.card p{margin:4px 0 0;font-size:14.5px;line-height:1.55;color:#334155}
+.card i{font-style:normal;font-weight:600;color:var(--c)}
+.card small{display:block;margin-top:8px;color:#64748b;font-size:12.5px}
+h3{font-size:18px;margin:36px 0 12px;color:var(--c)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:12px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tw{overflow-x:auto}
+@media(max-width:720px){.data,.grid{grid-template-columns:1fr}}
+.s1{--c:#3b82f6}.s2{--c:#10b981}.s3{--c:#f97316}.s4{--c:#a855f7}.s5{--c:#ec4899}.s6{--c:#0ea5e9}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:#94a3b8;font-size:14px}
+@media print{.page{max-width:none;padding:0}section{break-inside:avoid}body{print-color-adjust:exact;-webkit-print-color-adjust:exact}}
 </style>
 </head>
 <body>
 <main class="page">
 <h1>SmartCare MLOps architecture</h1>
-<p class="lead">How patient vitals move from wearable devices to a live risk dashboard, and how models are trained and deployed.</p>
-<p class="note">Monitoring and observability are not implemented. DevSecOps scanning is a possible future enhancement.</p>
+<p class="lead">How patient vitals move from wearable devices to a live risk dashboard, how models are trained and deployed, and which tool does what.</p>
+<p class="note">Lab project with simulated data. Monitoring and observability are not implemented yet. DevSecOps scanning is a possible future enhancement.</p>
 
 <section class="s1" id="s1">
 <h2><span>1</span>Data ingestion</h2>
@@ -75,7 +53,6 @@ flowchart LR
     A["Wearable devices&lt;br/&gt;2,000 simulated patients"] --> B["Python simulator"]
     B --> C["Patient vitals&lt;br/&gt;Heart rate, SpO₂, temperature&lt;br/&gt;Steps, battery, timestamp"]
     C --> D["Apache Kafka&lt;br/&gt;wearables.vitals"]
-
     classDef source fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
     classDef process fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
     classDef data fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
@@ -111,7 +88,6 @@ flowchart TD
     G --> H["Patient risk prediction"]
     H --> I["PostgreSQL&lt;br/&gt;Predictions and alerts"]
     I --> J["Streamlit dashboard"]
-
     classDef kafka fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
     classDef storage fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
     classDef stream fill:#DCFCE7,stroke:#16A34A,color:#14532D,stroke-width:2px
@@ -151,7 +127,6 @@ flowchart TD
     F --> G["Generate model features"]
     G --> H["Parquet feature dataset"]
     H --> I["MinIO&lt;br/&gt;clean-data/features/"]
-
     classDef storage fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
     classDef orchestration fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
     classDef transform fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px
@@ -187,7 +162,6 @@ flowchart TD
     F -->|Yes| G["MLflow Model Registry"]
     G --> H["Register candidate model"]
     F -->|No| I["Fail training workflow"]
-
     classDef data fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
     classDef preparation fill:#FFEDD5,stroke:#EA580C,color:#7C2D12,stroke-width:2px
     classDef training fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
@@ -230,7 +204,6 @@ flowchart TD
     I --> J{"Smoke test passed?"}
     J -->|No| R
     J -->|Yes| K["promote&lt;br/&gt;Promote the model in MLflow"]
-
     classDef pipeline fill:#DBEAFE,stroke:#2563EB,color:#172554,stroke-width:2px
     classDef build fill:#F3E8FF,stroke:#9333EA,color:#581C87,stroke-width:2px
     classDef deploy fill:#CCFBF1,stroke:#0F766E,color:#134E4A,stroke-width:2px
@@ -255,23 +228,55 @@ alias: candidate</pre><small>A model version in the registry.</small></div><div>
 <p>One manually triggered GitHub Actions workflow runs seven jobs on a self-hosted runner: train, eval, build, push, deploy, smoke and promote. The build job also tests the image before it is pushed. If the rollout or the smoke test fails, the deployment is rolled back and the model is not promoted.</p>
 </section>
 
+<section class="s6" id="s6">
+<h2><span>6</span>Tools and why we use them</h2>
+<p>Each card says what the tool is, why it is in this project, and where it runs.</p>
+
+<div class="s1"><h3>Ingestion and streaming</h3><div class="grid">
+<div class="card"><b>Python simulator</b><p><i>What</i> A script that makes fake wearable events and the list of crises.</p><p><i>Why</i> No real patient data is needed, and we control volume, dirty data and the true labels.</p><small>vm-sim</small></div>
+<div class="card"><b>Apache Kafka</b><p><i>What</i> A log that holds the event stream.</p><p><i>Why</i> One entry point for all data. Flink and MinIO read the same stream, and events are kept 3 days, so a slow reader loses nothing.</p><small>vm-kafka</small></div>
+<div class="card"><b>Kafdrop</b><p><i>What</i> A web page to look inside Kafka.</p><p><i>Why</i> See topics, messages and consumer lag while debugging.</p><small>vm-kafka</small></div>
+<div class="card"><b>Kafka Connect (S3 sink)</b><p><i>What</i> Copies Kafka topics to MinIO with no code.</p><p><i>Why</i> Keeps a raw copy for training, in folders by event date.</p><small>vm-kafka</small></div>
+<div class="card"><b>Apache Flink</b><p><i>What</i> A stream processor that remembers state.</p><p><i>Why</i> Five-minute windows per patient need memory and event time. BentoML cannot do this.</p><small>vm-flink</small></div>
+</div></div>
+
+<div class="s3"><h3>Storage and batch</h3><div class="grid">
+<div class="card"><b>MinIO</b><p><i>What</i> Object storage with the S3 API, run by us.</p><p><i>Why</i> One place for raw events, training data and MLflow files.</p><small>vm-data</small></div>
+<div class="card"><b>Apache Airflow</b><p><i>What</i> A scheduler for pipelines.</p><p><i>Why</i> Runs the ETL day by day, retries failures and keeps a history. It does the ETL only, not the training.</p><small>vm-mlops</small></div>
+<div class="card"><b>DuckDB</b><p><i>What</i> A SQL engine inside the Python process.</p><p><i>Why</i> Reads JSON and Parquet in MinIO directly and is fast on one small machine, so Spark is not needed.</p><small>Inside Airflow tasks</small></div>
+<div class="card"><b>Parquet</b><p><i>What</i> A columnar file format.</p><p><i>Why</i> Small, typed and fast. Training reads only the columns it needs.</p><small>MinIO, clean-data</small></div>
+</div></div>
+
+<div class="s4"><h3>Model and serving</h3><div class="grid">
+<div class="card"><b>XGBoost</b><p><i>What</i> A model made of many small decision trees.</p><p><i>Why</i> Strong on tables of numbers, handles missing values, and <code>scale_pos_weight</code> helps with rare crises.</p><small>Trained on the runner, served in k3s</small></div>
+<div class="card"><b>MLflow</b><p><i>What</i> Tracks training runs and keeps model versions.</p><p><i>Why</i> Every run is saved with its metrics. The aliases <code>candidate</code> and <code>production</code> show which version is which.</p><small>vm-mlops, files in MinIO</small></div>
+<div class="card"><b>BentoML</b><p><i>What</i> Turns the model into a REST API.</p><p><i>Why</i> Gives input checks, health checks, metrics and workers with little code.</p><small>k3s pods on vm-serving</small></div>
+<div class="card"><b>PostgreSQL</b><p><i>What</i> A relational database.</p><p><i>Why</i> Stores MLflow metadata, scores and alerts. The dashboard reads it with simple SQL.</p><small>vm-mlops</small></div>
+<div class="card"><b>Streamlit</b><p><i>What</i> A Python framework for web apps.</p><p><i>Why</i> The live dashboard is one Python file and refreshes every 10 seconds.</p><small>vm-mlops</small></div>
+</div></div>
+
+<div class="s5"><h3>CI/CD and platform</h3><div class="grid">
+<div class="card"><b>GitHub Actions</b><p><i>What</i> Runs the pipeline from the repository.</p><p><i>Why</i> One click runs all seven jobs. A self-hosted runner inside the VPC is needed because MinIO, MLflow and k3s are private.</p><small>vm-runner</small></div>
+<div class="card"><b>Docker and Docker Hub</b><p><i>What</i> Image packaging and a private image store.</p><p><i>Why</i> The image holds the code and the model, tagged with the model version, so a rollback is just an older tag.</p><small>Built on vm-runner</small></div>
+<div class="card"><b>k3s (Kubernetes)</b><p><i>What</i> A light Kubernetes.</p><p><i>Why</i> Runs 2 copies, replaces them one by one on update, checks readiness, and rolls back on failure.</p><small>vm-serving</small></div>
+<div class="card"><b>Google Cloud VPC</b><p><i>What</i> A private network with 7 VMs and no public IPs.</p><p><i>Why</i> Close to a real setup: services talk on private addresses, and SSH goes through IAP.</p><small>europe-west1</small></div>
+</div></div>
+
+<h3 style="color:var(--c)">Where everything runs</h3>
+<div class="tw"><table>
+<tr><th>VM</th><th>Tools</th></tr>
+<tr><td>vm-sim</td><td>Python simulator</td></tr>
+<tr><td>vm-kafka</td><td>Kafka, Kafka Connect, Kafdrop</td></tr>
+<tr><td>vm-flink</td><td>Flink (JobManager and TaskManager)</td></tr>
+<tr><td>vm-data</td><td>MinIO</td></tr>
+<tr><td>vm-mlops</td><td>Airflow, DuckDB, MLflow, PostgreSQL, Streamlit</td></tr>
+<tr><td>vm-serving</td><td>k3s, BentoML</td></tr>
+<tr><td>vm-runner</td><td>GitHub Actions runner, Docker</td></tr>
+</table></div>
+</section>
+
 <footer>SmartCare MLOps architecture diagrams</footer>
 </main>
-<script>
-  mermaid.initialize({
-    startOnLoad: false,
-    theme: 'base',
-    themeVariables: {
-      background: '#ffffff',
-      primaryTextColor: '#172554',
-      lineColor: '#64748b',
-      fontFamily: 'Arial, Helvetica, sans-serif',
-      fontSize: '16px'
-    },
-    flowchart: { htmlLabels: false, curve: 'basis', padding: 18, nodeSpacing: 45, rankSpacing: 50, useMaxWidth: true }
-  });
-  window.addEventListener('load', function () { mermaid.run({ querySelector: 'pre.mermaid' }); });
-</script>
 
 <!--claude-mermaid-runtime-begin:3477-->
 <style>.mermaid-diagram{margin-block:4px}.mermaid-diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}</style>
